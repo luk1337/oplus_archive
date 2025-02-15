@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# SPDX-FileCopyrightText: luk1337
+# SPDX-License-Identifier: MIT
+#
+
 set -ex
 
 # Extract full update
