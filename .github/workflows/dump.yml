@@ -36,7 +36,7 @@ jobs:
     - name: Upload release assets
       uses: ncipollo/release-action@v1.20.0
       with:
-        artifacts: ota/*.img.zst
+        artifacts: ota/*.img.*
         artifactErrorsFailBuild: true
         body: ${{ steps.dump.outputs.body }}
         tag: ${{ steps.dump.outputs.tag }}
