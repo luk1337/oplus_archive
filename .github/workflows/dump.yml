@@ -34,7 +34,7 @@ jobs:
       run: echo "${{ inputs.urls }}" | xargs ./dump.sh
 
     - name: Upload release assets
-      uses: ncipollo/release-action@v1
+      uses: ncipollo/release-action@v1.20.0
       with:
         artifacts: ota/*.img.zst
         artifactErrorsFailBuild: true
