@@ -31,7 +31,7 @@ jobs:
 
     - name: Dump
       id: dump
-      run: echo ${{ inputs.urls }} | xargs ./dump.sh
+      run: echo "${{ inputs.urls }}" | xargs ./dump.sh
 
     - name: Upload release assets
       uses: ncipollo/release-action@v1
