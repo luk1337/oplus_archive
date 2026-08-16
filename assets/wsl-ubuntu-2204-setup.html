@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WSL2 + Ubuntu 22.04 — Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E1013;
+    --panel: #171A20;
+    --panel-alt: #1D2129;
+    --border: #2A2F38;
+    --text: #E7E5E0;
+    --text-muted: #8B909B;
+    --blue: #4FB2F0;
+    --orange: #E96B2A;
+    --ok: #5FC98A;
+    --radius: 6px;
+  }
+  * { box-sizing: border-box; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  main{ max-width: 740px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  h1{
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: clamp(24px, 4.5vw, 32px);
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  h1 .accent{ color: var(--blue); }
+  .subtitle{ color: var(--text-muted); font-size: 15px; margin: 0 0 40px; }
+
+  .step{ margin-top: 40px; }
+  .step-head{ display:flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .step-num{ font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--orange); flex-shrink: 0; }
+  .step-num::before{ content: "# "; color: var(--text-muted); }
+  .step h2{ font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; margin: 0; }
+  .step p{ color: var(--text-muted); margin: 6px 0 12px; max-width: 62ch; font-size: 14.5px; }
+  .step p b{ color: var(--text); font-weight: 500; }
+
+  .codebox{ position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .codebox .bar{ display:flex; justify-content:space-between; align-items:center; padding: 7px 12px; background: var(--panel-alt); border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .copy-btn{ background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 9px; border-radius: 4px; cursor: pointer; }
+  .copy-btn:hover{ color: var(--text); border-color: var(--blue); }
+  .copy-btn:focus-visible{ outline: 2px solid var(--blue); outline-offset: 1px; }
+  .copy-btn.copied{ color: var(--ok); border-color: var(--ok); }
+
+  pre{ margin: 0; padding: 12px 14px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.5; }
+  pre .c{ color: var(--text-muted); }
+  pre .k{ color: var(--blue); }
+  pre .s{ color: var(--orange); }
+
+  .note{ margin-top: 10px; padding: 10px 12px; border-left: 2px solid var(--blue); background: rgba(79,178,240,0.06); border-radius: 0 4px 4px 0; font-size: 13.5px; color: var(--text-muted); }
+  .note b{ color: var(--text); }
+
+</style>
+</head>
+<body>
+<main>
+
+  <h1>WSL2 + <span class="accent">Ubuntu 22.04</span> Setup</h1>
+  <p class="subtitle">Windows Terminal first, then WSL bare, updated, then Ubuntu 22.04 on top.</p>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">01</span><h2>Install Windows Terminal</h2></div>
+    <p>Do the rest of this from Windows Terminal, not the default console host — proper copy/paste, tabs, and correct rendering of colored output make every step below easier. Install it from an admin PowerShell:</p>
+    <div class="codebox">
+      <div class="bar"><span>powershell — admin</span><button class="copy-btn" data-copy="winget install Microsoft.WindowsTerminal">Copy</button></div>
+      <pre><span class="k">winget install</span> Microsoft.WindowsTerminal</pre>
+    </div>
+    <div class="note">Already have it, or on a build where <code class="mono">winget</code> isn't available? Grab it from the Microsoft Store and skip ahead.</div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">02</span><h2>Install WSL — no distro yet</h2></div>
+    <p>Open a new tab in Windows Terminal running <b>PowerShell as Administrator</b>. This installs the WSL core and Virtual Machine Platform without pulling any Linux distro.</p>
+    <div class="codebox">
+      <div class="bar"><span>powershell — admin</span><button class="copy-btn" data-copy="wsl --install --no-distribution">Copy</button></div>
+      <pre><span class="k">wsl --install</span> --no-distribution</pre>
+    </div>
+    <div class="note">Restart Windows once this finishes — the Virtual Machine Platform feature needs a reboot to take effect.</div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">03</span><h2>Update WSL</h2></div>
+    <p>After the reboot, pull the latest WSL core before installing any distro on top of it.</p>
+    <div class="codebox">
+      <div class="bar"><span>powershell — admin</span><button class="copy-btn" data-copy="wsl --update">Copy</button></div>
+      <pre><span class="k">wsl --update</span></pre>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">04</span><h2>Install Ubuntu 22.04</h2></div>
+    <p>Now add the distro itself.</p>
+    <div class="codebox">
+      <div class="bar"><span>powershell</span><button class="copy-btn" data-copy="wsl --install -d Ubuntu-22.04">Copy</button></div>
+      <pre><span class="k">wsl --install</span> -d <span class="s">Ubuntu-22.04</span></pre>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">05</span><h2>Create your Linux user</h2></div>
+    <p>Launch <b>Ubuntu 22.04</b> from the Start menu, or its own tab in Windows Terminal. First run asks for a username and password — this is a Linux account, separate from Windows.</p>
+    <div class="codebox">
+      <div class="bar"><span>ubuntu-22.04 — first launch</span></div>
+      <pre><span class="c">Enter new UNIX username:</span> trops
+<span class="c">New password:</span>
+<span class="c">Retype new password:</span></pre>
+    </div>
+    <div class="note">Nothing appears on screen while you type the password — that's normal. Type it and press <b>Enter</b>, then type it again to confirm and press <b>Enter</b> once more.</div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">06</span><h2>Update packages</h2></div>
+    <div class="codebox">
+      <div class="bar"><span>bash</span><button class="copy-btn" data-copy="sudo apt update && sudo apt upgrade -y">Copy</button></div>
+      <pre><span class="k">sudo apt update</span> && <span class="k">sudo apt upgrade</span> -y</pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const val = btn.getAttribute('data-copy');
+      try {
+        await navigator.clipboard.writeText(val);
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1400);
+      } catch (e) {
+        btn.textContent = 'Select & copy';
+      }
+    });
+  });
+</script>
+</body>
+</html>
