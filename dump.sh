@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MIT
 #
 
-set -ex
+set -exo pipefail
 
 # Extract full update
-aria2c --header "userId: oplus-ota|16002018" -x5 $1 -o ota.zip
+aria2c --header "userId: oplus-ota|16002018" -x5 "$1" -o ota.zip
 unzip ota.zip payload.bin
 mv payload.bin payload_working.bin
 TAG="`unzip -p ota.zip META-INF/com/android/metadata | grep ^version_name= | cut -b 14-`"
@@ -18,12 +18,13 @@ mkdir ota
     ./bin/ota_extractor -output_dir ota -payload payload_working.bin
     rm payload_working.bin
 ) & # Allow subsequent downloads to be done in parallel
+pid=$!
 
 # Apply incrementals
-for i in ${@:2}; do
-    aria2c --header "userId: oplus-ota|16002018" -x5 $i -o ota.zip
+for i in "${@:2}"; do
+    aria2c --header "userId: oplus-ota|16002018" -x5 "$i" -o ota.zip
     unzip ota.zip payload.bin
-    wait
+    wait "$pid" # Wait on the specific PID so a failure actually trips set -e
     mv payload.bin payload_working.bin
     TAG="`unzip -p ota.zip META-INF/com/android/metadata | grep ^version_name= | cut -b 14-`"
     BODY="$BODY -> [$TAG]($i)"
@@ -38,8 +39,9 @@ for i in ${@:2}; do
 
         rm payload_working.bin
     ) & # Allow subsequent downloads to be done in parallel
+    pid=$!
 done
-wait
+wait "$pid"
 
 # Compress with zstd
 zstd -T0 --rm ota/*
